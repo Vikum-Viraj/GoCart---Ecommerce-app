@@ -1,0 +1,13 @@
+.git
+.gitignore
+README.md
+*.md
+.env
+.env.local
+.env.*.local
+node_modules
+.next
+.vercel
+yarn.lock
+package-lock.json
+*.pem
