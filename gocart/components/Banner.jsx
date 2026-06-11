@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 
 export default function Banner() {
 
-    const [isOpen, setIsOpen] = React.useState(true);
+    const [isOpen, setIsOpen] = React.useState(false);
 
     const handleClaim = () => {
         setIsOpen(false);
