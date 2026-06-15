@@ -5,6 +5,7 @@ import "./globals.css";
 import { ClerkProvider} from '@clerk/nextjs'
 
 
+
 const outfit = Outfit({ subsets: ["latin"], weight: ["400", "500", "600"] });
 
 export const metadata = {
@@ -14,7 +15,10 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
     return (
-        <ClerkProvider>
+        <ClerkProvider
+            frontendApi={process.env.NEXT_PUBLIC_CLERK_FRONTEND_API}
+            publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+        >
             <html lang="en">
                 <body className={`${outfit.className} antialiased`}>
                     <StoreProvider>

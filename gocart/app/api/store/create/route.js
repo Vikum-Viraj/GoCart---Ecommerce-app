@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import ImageKit from "imagekit";
@@ -11,9 +11,8 @@ const imagekit = new ImageKit({
 
 export async function POST(request) {
     try {
-
-        const { userId } = await auth()
         const formData = await request.formData()
+        
         const name = formData.get('name')
         const username = formData.get('username')
         const description = formData.get('description')
@@ -21,26 +20,43 @@ export async function POST(request) {
         const contact = formData.get('contact')
         const address = formData.get('address')
         const image = formData.get('image')
+        const userId = formData.get('userId')
 
-        if(!userId || !name || !username || !description || !email || !contact || !address || !image) {
+        if (!userId) {
+            return NextResponse.json({ error: 'Missing required userId' }, { status: 400 })
+        }
+
+        if (!name || !username || !description || !email || !contact || !address || !image) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
         }
 
         const store = await prisma.store.findFirst({
-            where: {userId:userId}
+            where: { userId }
         })
 
-        if(store) {
+        if (store) {
             return NextResponse.json({ error: 'Store already exists for this user' }, { status: 400 })
         }
 
         const checkUserName = await prisma.store.findFirst({
-            where: {username:username}
+            where: { username }
         })
 
-        if(checkUserName) {
+        if (checkUserName) {
             return NextResponse.json({ error: 'Username already taken' }, { status: 400 })
         }
+
+        // ensure the Clerk user exists in the Prisma user table
+        await prisma.user.upsert({
+            where: { id: userId },
+            create: {
+                id: userId,
+                name: username || email.split('@')[0],
+                email: email,
+                image: '',
+            },
+            update: {}
+        })
 
         // image upload to imagekit
         const buffer = Buffer.from(await image.arrayBuffer());
@@ -88,18 +104,18 @@ export async function POST(request) {
 
         
     } catch (error) {
-        console.log(error)
-        return NextResponse.json({ error: 'Something went wrong' }, { status: 500 })
+        console.error(error)
+        return NextResponse.json({ error: 'Something went wrong', details: error.message }, { status: 500 })
     }
 }
 
 export async function GET(request) {
     try {
-        const { userId } = await auth()
+        const { userId } = getAuth(request)
 
         // check is user have already registered a store
         const store = await prisma.store.findFirst({
-            where: { userId: userId }
+            where: { userId }
         })
 
         // if store is already registered then send status of store

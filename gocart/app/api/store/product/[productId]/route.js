@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { auth, getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import imagekit from "@/configs/imagekit";
@@ -6,7 +6,7 @@ import authSeller from "@/middlewares/authSeller";
 
 export async function PATCH(request, { params }) {
     try {
-        const { userId } = await auth()
+        const { userId } = getAuth(request)
         
         if (!userId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

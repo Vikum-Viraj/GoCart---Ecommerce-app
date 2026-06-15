@@ -8,7 +8,8 @@ export async function POST(request) {
     try {
         const { userId } = await auth()
         
-        console.log('POST /api/store/product - userId:', userId)
+        console.log('POST /api/store/product - userId:')
+        console.log("userid:", userId) 
         
         if (!userId) {
             return NextResponse.json({ 
